@@ -45,12 +45,12 @@ DockPerception::DockPerception(ros::NodeHandle& nh) :
   ros::NodeHandle pnh("~");
   debug_=true; //enable debugging for first time test
   // Should we publish the debugging cloud
-  /*
+/*
   if (!pnh.getParam("debug", debug_))
   {
     debug_ = false;
   }
-  */
+*/
   // Create coefficient vectors for a second order butterworth filter
   // with a cutoff frequency of 10 Hz assuming the loop is updated at 50 Hz
   // [b, a] = butter(order, cutoff_frequ/half_sampling_freq)

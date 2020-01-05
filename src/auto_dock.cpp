@@ -17,7 +17,7 @@
  */
 
 #include <fetch_auto_dock/auto_dock.h>
-
+#include <iostream>
 // STL Includes.
 #include <math.h>
 #include <algorithm>
@@ -63,7 +63,7 @@ void AutoDocking::stateCallback(const fetch_driver_msgs::RobotStateConstPtr& sta
 {
   // Check the voltage to see if we were connected to the dock.
   // Previously, this check was done by checking the supply_breaker.current
-  // but this isn't the best check since there are conditions where the charger hasn't 
+  // but this isn't the best check since there are conditions where the charger hasn't
   // yet enabled charging or is in some error state.
   // The thing that really needs to be checked is if we have made sufficient physical
   // contact with the dock connect, which the voltage should tell us.
@@ -104,10 +104,11 @@ void AutoDocking::dockCallback(const fetch_auto_dock_msgs::DockGoalConstPtr& goa
   // Get initial dock pose.
   geometry_msgs::PoseStamped dock_pose_base_link;
   while (!perception_.getPose(dock_pose_base_link, "base_link"))
-  {
+  { //std::cout<<"is this part even running?"<<std::endl;
+    //std::cout<<charging_<<std::endl;
     // Wait for perception to get its first pose estimate.
     if (!continueDocking(result))
-    {
+    { std::cout<<"docking not found callback"<<std::cout;
       ROS_DEBUG_NAMED("autodock_dock_callback",
                     "Docking failed: Initial dock not found.");
       break;
@@ -118,7 +119,12 @@ void AutoDocking::dockCallback(const fetch_auto_dock_msgs::DockGoalConstPtr& goa
   double dock_yaw = angles::normalize_angle(tf::getYaw(dock_pose_base_link.pose.orientation));
   if (!std::isfinite(dock_yaw))
   {
+
     ROS_ERROR_STREAM_NAMED("auto_dock", "Dock yaw is invalid.");
+    //this can be removed later. used for debugging.
+    std::cout<<dock_pose_base_link.pose.orientation<<std::endl;
+    std::cout<<dock_yaw<<std::endl;
+
     cancel_docking_ = true;
   }
   else if (ros::ok() && continueDocking(result))
@@ -129,7 +135,7 @@ void AutoDocking::dockCallback(const fetch_auto_dock_msgs::DockGoalConstPtr& goa
     backup_limit_ *= 0.9;
 
     // Preorient the robot towards the dock.
-    while (!controller_.backup(0.0, -dock_yaw) && 
+    while (!controller_.backup(0.0, -dock_yaw) &&
            continueDocking(result)             &&
            ros::ok()
            )
@@ -199,7 +205,8 @@ void AutoDocking::dockCallback(const fetch_auto_dock_msgs::DockGoalConstPtr& goa
 bool AutoDocking::continueDocking(fetch_auto_dock_msgs::DockResult& result)
 {
   // If charging, stop and return success.
-  if (charging_)
+  //if (charging_) //we wont be using their implementation of charging here.
+  if (false)
   {
     result.docked = true;
     dock_.setSucceeded(result);
@@ -227,8 +234,8 @@ bool AutoDocking::continueDocking(fetch_auto_dock_msgs::DockResult& result)
 
 /**
  * @brief Method to see if the robot seems to be docked but not charging.
- *        If the robot does seem to be docked and not charging, try will 
- *        timeout and set abort condition. 
+ *        If the robot does seem to be docked and not charging, try will
+ *        timeout and set abort condition.
  */
 void AutoDocking::checkDockChargingConditions()
 {
@@ -251,7 +258,7 @@ void AutoDocking::checkDockChargingConditions()
       // Reset correction angle since it was probably fine.
       correction_angle_ = 0.0;
       // Reset since we don't seem to be charging.
-      aborting_ = true;  
+      aborting_ = true;
     }
   }
   else
@@ -319,7 +326,7 @@ void AutoDocking::executeBackupSequence(ros::Rate& r)
 /**
  * @brief Method to compute the distance the robot should backup when attemping a docking
  *        correction. Method uses a number of state variables in the class to compute
- *        distance. TODO(enhancement): Should these be parameterized instead? 
+ *        distance. TODO(enhancement): Should these be parameterized instead?
  * @return Distance for robot to backup in meters.
  */
 double AutoDocking::backupDistance()
@@ -415,7 +422,7 @@ void AutoDocking::undockCallback(const fetch_auto_dock_msgs::UndockGoalConstPtr&
 
 
   // Disable the charger for just a little bit longer than the undock procedure might take.
-  lockoutCharger(6); 
+  lockoutCharger(6);
 
   fetch_auto_dock_msgs::UndockFeedback feedback;
   fetch_auto_dock_msgs::UndockResult result;

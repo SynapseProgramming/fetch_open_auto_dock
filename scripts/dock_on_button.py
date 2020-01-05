@@ -1,49 +1,21 @@
 #!/usr/bin/env python
-
-# Copyright (c) 2015, Fetch Robotics Inc.
-# Author: Michael Ferguson
-
 import rospy
 import actionlib
-from sensor_msgs.msg import Joy
 from fetch_auto_dock_msgs.msg import DockAction, DockGoal
 
-# Listen to joy messages, when button held, dock
-class DockTeleop:
-    ACTION_NAME = "/dock"
+# Create a ROS node
+rospy.init_node("dock_the_robot")
 
-    def __init__(self):
-        rospy.loginfo("Connecting to %s..." % self.ACTION_NAME)
-        self.client = actionlib.SimpleActionClient(self.ACTION_NAME, DockAction)
-        self.client.wait_for_server()
-        rospy.loginfo("Done.")
-
-        self.dock_button = rospy.get_param("~dock_button", 13)  # default button is the circle
-
-        self.pressed = False
-        self.pressed_last = None
-
-        self.joy_sub = rospy.Subscriber("joy", Joy, self.joy_callback)
-
-    def joy_callback(self, msg):
-        try:
-            if msg.buttons[self.dock_button] > 0:
-                if not self.pressed:
-                    self.pressed_last = rospy.Time.now()
-                    self.pressed = True
-                elif self.pressed_last and rospy.Time.now() > self.pressed_last + rospy.Duration(1.0):
-                    self.reset()
-                    self.pressed_last = None
-            else:
-                self.pressed = False
-        except IndexError:
-            rospy.logwarn("dock_button is out of range")
-
-    def reset(self):
-        goal = DockGoal()
-        self.client.send_goal(goal)
-
-if __name__ == "__main__":
-    rospy.init_node("dock_on_button")
-    c = DockTeleop()
-    rospy.spin()
+# Create an action client
+client = actionlib.SimpleActionClient("/dock", DockAction)
+client.wait_for_server()
+print("server started!")
+# Create and send a goal
+goal = DockGoal()
+goal.dock_pose.header.frame_id = "base_link"
+goal.dock_pose.pose.position.x = 2.0
+goal.dock_pose.pose.orientation.x = 0.0
+goal.dock_pose.pose.orientation.y = 0.0
+goal.dock_pose.pose.orientation.z = 0.0
+goal.dock_pose.pose.orientation.w = 0.0
+client.send_goal(goal)
