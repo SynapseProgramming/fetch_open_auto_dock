@@ -43,13 +43,14 @@ DockPerception::DockPerception(ros::NodeHandle& nh) :
   found_dock_(false)
 {
   ros::NodeHandle pnh("~");
-
+  debug_=true; //enable debugging for first time test
   // Should we publish the debugging cloud
+/*
   if (!pnh.getParam("debug", debug_))
   {
     debug_ = false;
   }
-
+*/
   // Create coefficient vectors for a second order butterworth filter
   // with a cutoff frequency of 10 Hz assuming the loop is updated at 50 Hz
   // [b, a] = butter(order, cutoff_frequ/half_sampling_freq)
@@ -136,7 +137,7 @@ bool DockPerception::getPose(geometry_msgs::PoseStamped& pose, std::string frame
   tf::quaternionMsgToTF(dock_.pose.orientation, q);
   if (!isValid(q))
   {
-    ROS_ERROR_STREAM_NAMED("perception", 
+    ROS_ERROR_STREAM_NAMED("perception",
                            "Dock orientation invalid.");
     ROS_DEBUG_STREAM_NAMED("perception",
                            "Quaternion magnitude is "
@@ -423,7 +424,7 @@ double DockPerception::fit(const DockCandidatePtr& candidate, geometry_msgs::Pos
   quaternionMsgToTF(pose.orientation, init_pose);
   if (!isValid(init_pose))
   {
-    ROS_ERROR_STREAM_NAMED("perception", 
+    ROS_ERROR_STREAM_NAMED("perception",
                            "Initial dock orientation estimate is invalid.");
     ROS_DEBUG_STREAM_NAMED("perception",
                            "Quaternion magnitude is "
@@ -440,9 +441,9 @@ double DockPerception::fit(const DockCandidatePtr& candidate, geometry_msgs::Pos
   quaternionMsgToTF(transform.rotation, cand_pose);
   if (!isValid(cand_pose))
   {
-    ROS_WARN_STREAM_NAMED("perception", 
-                          "Dock candidate orientation estimate is invalid."); 
-    ROS_DEBUG_STREAM_NAMED("perception", 
+    ROS_WARN_STREAM_NAMED("perception",
+                          "Dock candidate orientation estimate is invalid.");
+    ROS_DEBUG_STREAM_NAMED("perception",
                            "Quaternion magnitude is "
                            << cand_pose.length()
                            << " Quaternion is ["
@@ -488,12 +489,12 @@ double DockPerception::fit(const DockCandidatePtr& candidate, geometry_msgs::Pos
         transform.rotation = tf::createQuaternionMsgFromYaw(3.1415 + tf::getYaw(transform.rotation));
       }
     }
-     
+
     // If the dock orientation is still really borked, fail.
     quaternionMsgToTF(transform.rotation, cand_pose);
     if (!isValid(cand_pose))
     {
-      ROS_ERROR_STREAM_NAMED("perception", 
+      ROS_ERROR_STREAM_NAMED("perception",
                              "Dock candidate orientation estimate is invalid.");
       ROS_DEBUG_STREAM_NAMED("perception","Quaternion magnitude is "
                              << cand_pose.length()
