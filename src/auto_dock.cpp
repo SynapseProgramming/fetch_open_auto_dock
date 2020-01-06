@@ -63,8 +63,8 @@ AutoDocking::~AutoDocking()
 //modified state callback to use distance to determine if the bot has docked, instead
 // of using the voltage.
 void AutoDocking::stateCallback(const std_msgs::Float32::ConstPtr &state)
-{   double input=state->data;
- if(input < 0.22){charging_=true;}
+{
+  if(state->data < 0.22){charging_=true;}
   else{charging_=false;}
 
 }
@@ -99,12 +99,12 @@ void AutoDocking::dockCallback(const fetch_auto_dock_msgs::DockGoalConstPtr& goa
 
   // Get initial dock pose.
   geometry_msgs::PoseStamped dock_pose_base_link;
+  ROS_INFO("Finding Dock!");
   while (!perception_.getPose(dock_pose_base_link, "base_link"))
-  { //std::cout<<"is this part even running?"<<std::endl;
-    //std::cout<<charging_<<std::endl;
-    // Wait for perception to get its first pose estimate.
+  {
+
     if (!continueDocking(result))
-    { std::cout<<"docking not found callback"<<std::cout;
+    { ROS_ERROR("Dock not found!");
       ROS_DEBUG_NAMED("autodock_dock_callback",
                     "Docking failed: Initial dock not found.");
       break;
@@ -117,10 +117,7 @@ void AutoDocking::dockCallback(const fetch_auto_dock_msgs::DockGoalConstPtr& goa
   {
 
     ROS_ERROR_STREAM_NAMED("auto_dock", "Dock yaw is invalid.");
-    //this can be removed later. used for debugging.
-    std::cout<<dock_pose_base_link.pose.orientation<<std::endl;
-    std::cout<<dock_yaw<<std::endl;
-
+    std::cout<<"The invalid yaw value is: "<<dock_yaw<<std::endl;
     cancel_docking_ = true;
   }
   else if (ros::ok() && continueDocking(result))
@@ -129,6 +126,7 @@ void AutoDocking::dockCallback(const fetch_auto_dock_msgs::DockGoalConstPtr& goa
     backup_limit_ = sqrt(pow(dock_pose_base_link.pose.position.x, 2) + pow(dock_pose_base_link.pose.position.y, 2));
     // Shorten up the range a bit.
     backup_limit_ *= 0.9;
+
 
     // Preorient the robot towards the dock.
     while (!controller_.backup(0.0, -dock_yaw) &&
@@ -201,12 +199,11 @@ void AutoDocking::dockCallback(const fetch_auto_dock_msgs::DockGoalConstPtr& goa
 bool AutoDocking::continueDocking(fetch_auto_dock_msgs::DockResult& result)
 {
   // If charging, stop and return success.
-  //if (charging_) //we wont be using their implementation of charging here.
   if (charging_)
   {
     result.docked = true;
     dock_.setSucceeded(result);
-    std::cout<<"DOCK REACHED!!!"<<std::endl;
+    ROS_INFO("DOCK REACHED!");
     ROS_DEBUG_NAMED("autodock_dock_callback",
                     "Docking success: Robot has docked");
     return false;
