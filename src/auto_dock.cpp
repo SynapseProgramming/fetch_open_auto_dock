@@ -39,9 +39,9 @@ AutoDocking::AutoDocking() :
 {
   // Load ros parameters
   ros::NodeHandle pnh("~");
-  pnh.param("abort_distance",                    abort_distance_,                    0.40);
-  pnh.param("abort_threshold",                   abort_threshold_,                   0.025);
-  pnh.param("abort_angle",                       abort_angle_,                       5.0*(M_PI/180.0)),
+  pnh.param("abort_distance",                    abort_distance_,                    0.4); // original 0.4
+  pnh.param("abort_threshold",                   abort_threshold_,                   0.025); // original 0.025 m
+  pnh.param("abort_angle",                       abort_angle_,                       5.0*(M_PI/180.0)), //original 5.0 degrees
   pnh.param("num_of_retries",                    NUM_OF_RETRIES_,                    5);
   pnh.param("dock_connector_clearance_distance", DOCK_CONNECTOR_CLEARANCE_DISTANCE_, 0.2);
   pnh.param("docked_distance_threshold",         DOCKED_DISTANCE_THRESHOLD_,         0.34);
@@ -169,7 +169,10 @@ void AutoDocking::dockCallback(const fetch_auto_dock_msgs::DockGoalConstPtr& goa
           aborting_ = true;
         }
         else
-        {
+        { //test statements for using algorithms distance measurement between base_link and dock center. 
+          geometry_msgs::PoseStamped dock_pose_base_link;
+          perception_.getPose(dock_pose_base_link, "base_link");
+          std::cout<<dock_pose_base_link<<std::endl;
           // Update control
           controller_.approach(feedback.dock_pose);
           // Are we on the dock? Check charging timeout.
@@ -295,8 +298,8 @@ bool AutoDocking::isDockingTimedOut()
 void AutoDocking::executeBackupSequence(ros::Rate& r)
 {
   // Disable charging for a second.
-  lockoutCharger(1);
-
+  //lockoutCharger(1);
+  ROS_ERROR("Poor Approach! Backing up!");
   // Get off of the dock. Try to straighten out.
   while (!controller_.backup(DOCK_CONNECTOR_CLEARANCE_DISTANCE_, correction_angle_))
   {
