@@ -25,6 +25,7 @@
 
 // ROS Includes.
 #include <ros/ros.h>
+#include <std_msgs/Float32.h>
 #include <actionlib/server/simple_action_server.h>
 #include <actionlib/client/simple_action_client.h>
 
@@ -53,7 +54,7 @@ private:
    * @brief Method to update the robot charge state.
    * @param state Robot state message to extract charge state from.
    */
-  void stateCallback(const fetch_driver_msgs::RobotStateConstPtr& state);
+  void stateCallback(const std_msgs::Float32::ConstPtr &state);
 
   /**
    * @brief Method to execute the docking behavior.
@@ -70,8 +71,8 @@ private:
 
   /**
    * @brief Method to see if the robot seems to be docked but not charging.
-   *        If the robot does seem to be docked and not charging, try will 
-   *        timeout and set abort condition. 
+   *        If the robot does seem to be docked and not charging, try will
+   *        timeout and set abort condition.
    */
   void checkDockChargingConditions();
 
@@ -104,7 +105,7 @@ private:
   /**
    * @brief Method to compute the distance the robot should backup when attemping a docking
    *        correction. Method uses a number of state variables in the class to compute
-   *        distance. TODO(enhancement): Should these be parameterized instead? 
+   *        distance. TODO(enhancement): Should these be parameterized instead?
    * @return Distance for robot to backup in meters.
    */
   double backupDistance();
@@ -121,9 +122,9 @@ private:
 
   /**
    * @brief Method to disable the charger for a finite amount of time.
-   * @param seconds Number of seconds to disable the charger for. Maximum 
+   * @param seconds Number of seconds to disable the charger for. Maximum
    *                number of seconds is 255. Zero seconds enables the charger.
-   * @return True if the number of seconds is valid and the lockout request was 
+   * @return True if the number of seconds is valid and the lockout request was
    *         successful.
    */
   bool lockoutCharger(unsigned seconds);

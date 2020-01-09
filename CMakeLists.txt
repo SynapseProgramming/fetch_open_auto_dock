@@ -17,6 +17,7 @@ find_package(catkin REQUIRED
     roscpp
     rospy
     std_msgs
+    sensor_msgs
     tf
 )
 find_package(Eigen3 REQUIRED)
@@ -51,12 +52,21 @@ add_executable(auto_dock
   src/perception.cpp
   src/linear_pose_filter_2d.cpp
 )
+
+add_executable(dock_measure src/charging_dock_dist.cpp)
 target_link_libraries(auto_dock
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(dock_measure
   ${catkin_LIBRARIES}
 )
 add_dependencies(auto_dock
   ${catkin_EXPORTED_TARGETS}
 )
+add_dependencies(dock_measure
+  ${catkin_EXPORTED_TARGETS}
+)
+
 
 if (CATKIN_ENABLE_TESTING)
   add_subdirectory(test)

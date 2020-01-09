@@ -24,6 +24,7 @@
 
 // ROS Includes.
 #include <angles/angles.h>
+#include <std_msgs/Float32.h>
 
 AutoDocking::AutoDocking() :
   dock_(nh_, "dock", boost::bind(&AutoDocking::dockCallback, this, _1), false),
@@ -38,15 +39,15 @@ AutoDocking::AutoDocking() :
 {
   // Load ros parameters
   ros::NodeHandle pnh("~");
-  pnh.param("abort_distance",                    abort_distance_,                    0.40);
-  pnh.param("abort_threshold",                   abort_threshold_,                   0.025);
-  pnh.param("abort_angle",                       abort_angle_,                       5.0*(M_PI/180.0)),
+  pnh.param("abort_distance",                    abort_distance_,                    0.4); // original 0.4
+  pnh.param("abort_threshold",                   abort_threshold_,                   0.025); // original 0.025 m
+  pnh.param("abort_angle",                       abort_angle_,                       5.0*(M_PI/180.0)), //original 5.0 degrees
   pnh.param("num_of_retries",                    NUM_OF_RETRIES_,                    5);
   pnh.param("dock_connector_clearance_distance", DOCK_CONNECTOR_CLEARANCE_DISTANCE_, 0.2);
   pnh.param("docked_distance_threshold",         DOCKED_DISTANCE_THRESHOLD_,         0.34);
 
   // Subscribe to robot state
-  state_ = nh_.subscribe<fetch_driver_msgs::RobotState>("robot_state",
+  state_ = nh_.subscribe<std_msgs::Float32>("dock_dist",
                                                         1,
                                                         boost::bind(&AutoDocking::stateCallback, this, _1));
 
@@ -59,18 +60,13 @@ AutoDocking::~AutoDocking()
 {
 }
 
-void AutoDocking::stateCallback(const fetch_driver_msgs::RobotStateConstPtr& state)
+//modified state callback to use distance to determine if the bot has docked, instead
+// of using the voltage.
+void AutoDocking::stateCallback(const std_msgs::Float32::ConstPtr &state)
 {
-  // Check the voltage to see if we were connected to the dock.
-  // Previously, this check was done by checking the supply_breaker.current
-  // but this isn't the best check since there are conditions where the charger hasn't
-  // yet enabled charging or is in some error state.
-  // The thing that really needs to be checked is if we have made sufficient physical
-  // contact with the dock connect, which the voltage should tell us.
-  // This should also help extend the life of the tires, as previously the robot would
-  // continue to drive until the supply_breaker.current passed a threshold, which could
-  // take several seconds.
-  charging_ = (state->charger.supply_voltage > 30.0);
+  if(state->data < 0.22){charging_=true;}
+  else{charging_=false;}
+
 }
 
 void AutoDocking::dockCallback(const fetch_auto_dock_msgs::DockGoalConstPtr& goal)
@@ -103,12 +99,12 @@ void AutoDocking::dockCallback(const fetch_auto_dock_msgs::DockGoalConstPtr& goa
 
   // Get initial dock pose.
   geometry_msgs::PoseStamped dock_pose_base_link;
+  ROS_INFO("Finding Dock!");
   while (!perception_.getPose(dock_pose_base_link, "base_link"))
-  { //std::cout<<"is this part even running?"<<std::endl;
-    //std::cout<<charging_<<std::endl;
-    // Wait for perception to get its first pose estimate.
+  {
+
     if (!continueDocking(result))
-    { std::cout<<"docking not found callback"<<std::cout;
+    { ROS_ERROR("Dock not found!");
       ROS_DEBUG_NAMED("autodock_dock_callback",
                     "Docking failed: Initial dock not found.");
       break;
@@ -121,10 +117,7 @@ void AutoDocking::dockCallback(const fetch_auto_dock_msgs::DockGoalConstPtr& goa
   {
 
     ROS_ERROR_STREAM_NAMED("auto_dock", "Dock yaw is invalid.");
-    //this can be removed later. used for debugging.
-    std::cout<<dock_pose_base_link.pose.orientation<<std::endl;
-    std::cout<<dock_yaw<<std::endl;
-
+    std::cout<<"The invalid yaw value is: "<<dock_yaw<<std::endl;
     cancel_docking_ = true;
   }
   else if (ros::ok() && continueDocking(result))
@@ -133,6 +126,7 @@ void AutoDocking::dockCallback(const fetch_auto_dock_msgs::DockGoalConstPtr& goa
     backup_limit_ = sqrt(pow(dock_pose_base_link.pose.position.x, 2) + pow(dock_pose_base_link.pose.position.y, 2));
     // Shorten up the range a bit.
     backup_limit_ *= 0.9;
+
 
     // Preorient the robot towards the dock.
     while (!controller_.backup(0.0, -dock_yaw) &&
@@ -175,7 +169,10 @@ void AutoDocking::dockCallback(const fetch_auto_dock_msgs::DockGoalConstPtr& goa
           aborting_ = true;
         }
         else
-        {
+        { //test statements for using algorithms distance measurement between base_link and dock center. 
+          geometry_msgs::PoseStamped dock_pose_base_link;
+          perception_.getPose(dock_pose_base_link, "base_link");
+          std::cout<<dock_pose_base_link<<std::endl;
           // Update control
           controller_.approach(feedback.dock_pose);
           // Are we on the dock? Check charging timeout.
@@ -205,11 +202,11 @@ void AutoDocking::dockCallback(const fetch_auto_dock_msgs::DockGoalConstPtr& goa
 bool AutoDocking::continueDocking(fetch_auto_dock_msgs::DockResult& result)
 {
   // If charging, stop and return success.
-  //if (charging_) //we wont be using their implementation of charging here.
-  if (false)
+  if (charging_)
   {
     result.docked = true;
     dock_.setSucceeded(result);
+    ROS_INFO("DOCK REACHED!");
     ROS_DEBUG_NAMED("autodock_dock_callback",
                     "Docking success: Robot has docked");
     return false;
@@ -301,8 +298,8 @@ bool AutoDocking::isDockingTimedOut()
 void AutoDocking::executeBackupSequence(ros::Rate& r)
 {
   // Disable charging for a second.
-  lockoutCharger(1);
-
+  //lockoutCharger(1);
+  ROS_ERROR("Poor Approach! Backing up!");
   // Get off of the dock. Try to straighten out.
   while (!controller_.backup(DOCK_CONNECTOR_CLEARANCE_DISTANCE_, correction_angle_))
   {
