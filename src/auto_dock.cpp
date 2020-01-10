@@ -24,7 +24,7 @@
 
 // ROS Includes.
 #include <angles/angles.h>
-#include <std_msgs/Float32.h>
+
 
 AutoDocking::AutoDocking() :
   dock_(nh_, "dock", boost::bind(&AutoDocking::dockCallback, this, _1), false),
@@ -46,10 +46,6 @@ AutoDocking::AutoDocking() :
   pnh.param("dock_connector_clearance_distance", DOCK_CONNECTOR_CLEARANCE_DISTANCE_, 0.2);
   pnh.param("docked_distance_threshold",         DOCKED_DISTANCE_THRESHOLD_,         0.34);
 
-  // Subscribe to robot state
-  state_ = nh_.subscribe<std_msgs::Float32>("dock_dist",
-                                                        1,
-                                                        boost::bind(&AutoDocking::stateCallback, this, _1));
 
   // Start action server thread
   dock_.start();
@@ -60,14 +56,7 @@ AutoDocking::~AutoDocking()
 {
 }
 
-//modified state callback to use distance to determine if the bot has docked, instead
-// of using the voltage.
-void AutoDocking::stateCallback(const std_msgs::Float32::ConstPtr &state)
-{
-  if(state->data < 0.22){charging_=true;}
-  else{charging_=false;}
 
-}
 
 void AutoDocking::dockCallback(const fetch_auto_dock_msgs::DockGoalConstPtr& goal)
 {
@@ -79,7 +68,7 @@ void AutoDocking::dockCallback(const fetch_auto_dock_msgs::DockGoalConstPtr& goa
   aborting_ = false;
   charging_timeout_set_ = false;
   cancel_docking_ = false;
-
+  charging_=false;
   // Not currently supporting move_base option
   if (goal->use_move_base)
   {
@@ -112,6 +101,7 @@ void AutoDocking::dockCallback(const fetch_auto_dock_msgs::DockGoalConstPtr& goa
   }
 
   // Preorient the robot.
+  ROS_INFO("pre-orienting the robot!");
   double dock_yaw = angles::normalize_angle(tf::getYaw(dock_pose_base_link.pose.orientation));
   if (!std::isfinite(dock_yaw))
   {
@@ -169,10 +159,14 @@ void AutoDocking::dockCallback(const fetch_auto_dock_msgs::DockGoalConstPtr& goa
           aborting_ = true;
         }
         else
-        { //test statements for using algorithms distance measurement between base_link and dock center. 
-          geometry_msgs::PoseStamped dock_pose_base_link;
-          perception_.getPose(dock_pose_base_link, "base_link");
-          std::cout<<dock_pose_base_link<<std::endl;
+        { //test statements for using algorithms distance measurement between base_link and dock center.
+          geometry_msgs::PoseStamped dock_x_distance;
+          perception_.getPose(dock_x_distance, "base_link");
+
+          std::cout<<"Distance to dock: "<<dock_x_distance.pose.position.x<<std::endl;
+          //remember to replace 0.55 with a reconfigurable parameter
+          if(dock_x_distance.pose.position.x <=0.55){charging_=true;}
+          else{charging_=false;}
           // Update control
           controller_.approach(feedback.dock_pose);
           // Are we on the dock? Check charging timeout.
