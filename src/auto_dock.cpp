@@ -39,7 +39,7 @@ AutoDocking::AutoDocking() :
 {
   // Load ros parameters
   ros::NodeHandle pnh("~");
-  pnh.param("abort_distance",                    abort_distance_,                    0.4); // original 0.4
+  pnh.param("abort_distance",                    abort_distance_,                    0.59); // original 0.4
   pnh.param("abort_threshold",                   abort_threshold_,                   0.025); // original 0.025 m
   pnh.param("abort_angle",                       abort_angle_,                       5.0*(M_PI/180.0)), //original 5.0 degrees
   pnh.param("num_of_retries",                    NUM_OF_RETRIES_,                    5);
