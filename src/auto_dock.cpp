@@ -29,7 +29,6 @@
 AutoDocking::AutoDocking() :
   dock_(nh_, "dock", boost::bind(&AutoDocking::dockCallback, this, _1), false),
   undock_(nh_, "undock", boost::bind(&AutoDocking::undockCallback, this, _1), false),
-  charge_lockout_("charge_lockout", true),
   controller_(nh_),
   perception_(nh_),
   aborting_(false),
@@ -292,7 +291,7 @@ bool AutoDocking::isDockingTimedOut()
 void AutoDocking::executeBackupSequence(ros::Rate& r)
 {
   // Disable charging for a second.
-  //lockoutCharger(1);
+
   ROS_ERROR("Poor Approach! Backing up!");
   // Get off of the dock. Try to straighten out.
   while (!controller_.backup(DOCK_CONNECTOR_CLEARANCE_DISTANCE_, correction_angle_))
@@ -377,43 +376,11 @@ bool AutoDocking::isApproachBad(double & dock_yaw)
   return false;
 }
 
-bool AutoDocking::lockoutCharger(unsigned seconds)
-{
-  // Check if parameter is valid.
-  if (seconds > 255)
-  {
-    return false;
-  }
-
-  fetch_driver_msgs::DisableChargingGoal lockout_goal;
-
-  // Attempt to connect to the charger lockout server and lockout the charger.
-  if (charge_lockout_.waitForServer(ros::Duration(1.0)))
-  {
-    lockout_goal.disable_duration = ros::Duration(seconds);
-    charge_lockout_.sendGoal(lockout_goal);
-
-    if (!charge_lockout_.waitForResult(ros::Duration(1.0)))
-    {
-      ROS_WARN_STREAM_NAMED("autodock_undock_callback", "Unable to lockout charger before undocking.");
-      return false;
-    }
-  }
-  else
-  {
-    ROS_WARN_STREAM_NAMED("autodock_undock_callback", "Charge lockout server could not be contacted.");
-    return false;
-  }
-
-  return true;
-}
 
 void AutoDocking::undockCallback(const fetch_auto_dock_msgs::UndockGoalConstPtr& goal)
 {
 
 
-  // Disable the charger for just a little bit longer than the undock procedure might take.
-  lockoutCharger(6);
 
   fetch_auto_dock_msgs::UndockFeedback feedback;
   fetch_auto_dock_msgs::UndockResult result;
@@ -448,8 +415,6 @@ void AutoDocking::undockCallback(const fetch_auto_dock_msgs::UndockGoalConstPtr&
       result.undocked = true;
       controller_.stop();
       undock_.setSucceeded(result);
-      // Command the charger to turn back on.
-      lockoutCharger(0);
       ROS_DEBUG_NAMED("autodock_undock_callback", "Robot has undocked");
       return;
     }
@@ -462,8 +427,6 @@ void AutoDocking::undockCallback(const fetch_auto_dock_msgs::UndockGoalConstPtr&
     {
       controller_.stop();
       undock_.setAborted(result);
-      // Command the charger to turn back on.
-      lockoutCharger(0);
       ROS_WARN_NAMED("autodock_undock_callback", "Undocking failed: timed out");
       return;
     }
@@ -473,8 +436,6 @@ void AutoDocking::undockCallback(const fetch_auto_dock_msgs::UndockGoalConstPtr&
 
   controller_.stop();
   undock_.setAborted(result);
-  // Command the charger to turn back on.
-  lockoutCharger(0);
   ROS_WARN_NAMED("autodock_undock_callback", "Undocking failed: ROS no longer OK");
 }
 
