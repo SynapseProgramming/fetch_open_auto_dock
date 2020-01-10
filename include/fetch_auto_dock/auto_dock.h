@@ -25,7 +25,7 @@
 
 // ROS Includes.
 #include <ros/ros.h>
-#include <std_msgs/Float32.h>
+
 #include <actionlib/server/simple_action_server.h>
 #include <actionlib/client/simple_action_client.h>
 
@@ -50,11 +50,7 @@ public:
   ~AutoDocking();
 
 private:
-  /**
-   * @brief Method to update the robot charge state.
-   * @param state Robot state message to extract charge state from.
-   */
-  void stateCallback(const std_msgs::Float32::ConstPtr &state);
+
 
   /**
    * @brief Method to execute the docking behavior.
