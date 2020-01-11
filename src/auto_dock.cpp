@@ -410,7 +410,7 @@ void AutoDocking::undockCallback(const fetch_open_auto_dock::UndockGoalConstPtr&
   controller_.stop();
 
   // Timeout for undocking
-  ros::Time timeout = ros::Time::now() + ros::Duration(5.0);
+  ros::Time timeout = ros::Time::now() + ros::Duration(50.0);
 
   // Control
   ros::Rate r(50.0);

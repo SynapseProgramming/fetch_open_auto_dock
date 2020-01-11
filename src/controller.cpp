@@ -178,7 +178,7 @@ bool BaseController::backup(double distance, double rotate_distance)
   {
     ROS_ERROR_STREAM_NAMED("controller", "Backup parameters are not valid.");
     stop();
-    return true; 
+    return true;
   }
 
   // Get current base pose in odom
@@ -224,12 +224,14 @@ bool BaseController::backup(double distance, double rotate_distance)
       return true;
     }
     else if (rotate_distance > 0.0)
-    {
-      command_.angular.z = std::min(2.0, fabs(error)*2.0);
+    { //for rotation, take the  minimum value as the angular turning rate
+    //  command_.angular.z = std::min(2.0, fabs(error)*2.0); original. too fast.
+        command_.angular.z = std::min(1.0, fabs(error)*1.2);
     }
     else
     {
-      command_.angular.z = std::max(-2.0, -fabs(error)*2.0);
+    //  command_.angular.z = std::max(-2.0, -fabs(error)*2.0); original. too fast. 
+        command_.angular.z = std::max(-1.0, -fabs(error)*1.2);
     }
   }
   else
