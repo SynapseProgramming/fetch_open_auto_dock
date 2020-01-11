@@ -30,7 +30,6 @@
 #include <actionlib/client/simple_action_client.h>
 
 // Fetch Includes.
-#include <fetch_driver_msgs/RobotState.h>
 #include <fetch_auto_dock_msgs/DockAction.h>
 #include <fetch_auto_dock_msgs/UndockAction.h>
 

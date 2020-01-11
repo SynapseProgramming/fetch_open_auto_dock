@@ -10,7 +10,6 @@ find_package(catkin REQUIRED
     actionlib
     angles
     fetch_auto_dock_msgs
-    fetch_driver_msgs
     geometry_msgs
     nav_msgs
     roslib
@@ -27,7 +26,6 @@ catkin_package(
   CATKIN_DEPENDS
     actionlib
     fetch_auto_dock_msgs
-    fetch_driver_msgs
     geometry_msgs
     nav_msgs
     roslib
