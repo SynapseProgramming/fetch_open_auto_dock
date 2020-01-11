@@ -66,12 +66,23 @@ add_executable(auto_dock
   src/linear_pose_filter_2d.cpp
 )
 
+add_executable(master_dock_controller src/master_dock_controller.cpp)
 
 target_link_libraries(auto_dock
   ${catkin_LIBRARIES}
 )
 
+target_link_libraries(master_dock_controller
+  ${catkin_LIBRARIES}
+)
+
+
 add_dependencies(auto_dock
+  ${catkin_EXPORTED_TARGETS}
+  ${fetch_open_auto_dock_EXPORTED_TARGETS}
+)
+
+add_dependencies(master_dock_controller
   ${catkin_EXPORTED_TARGETS}
   ${fetch_open_auto_dock_EXPORTED_TARGETS}
 )
