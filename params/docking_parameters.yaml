@@ -1,0 +1,6 @@
+abort_distance: 0.59
+abort_threshold: 0.025
+abort_angle: 0.087266
+num_of_retries: 5
+dock_connector_clearance_distance: 0.3
+docked_distance_threshold: 0.34

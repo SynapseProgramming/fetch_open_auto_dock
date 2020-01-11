@@ -1,5 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <launch>
   <node name="auto_dock" pkg="fetch_open_auto_dock" type="auto_dock" output="screen" >
+  <rosparam file="$(find fetch_open_auto_dock)/params/docking_parameters.yaml" command="load"/>
   <remap from="base_scan" to="scan" />
 
 
