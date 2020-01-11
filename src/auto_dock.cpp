@@ -401,7 +401,7 @@ void AutoDocking::undockCallback(const fetch_open_auto_dock::UndockGoalConstPtr&
   fetch_open_auto_dock::UndockFeedback feedback;
   fetch_open_auto_dock::UndockResult result;
   result.undocked = false;
-
+  ROS_INFO("undocking robot!");
   // Distances to backup/turn
   double backup = DOCK_CONNECTOR_CLEARANCE_DISTANCE_;
   double turn = goal->rotate_in_place ? 3.1 : 0.0;
@@ -428,6 +428,7 @@ void AutoDocking::undockCallback(const fetch_open_auto_dock::UndockGoalConstPtr&
     if (controller_.backup(backup, turn))
     {
       // Odom says we have undocked
+      ROS_INFO("Undock Successful!");
       result.undocked = true;
       controller_.stop();
       undock_.setSucceeded(result);
