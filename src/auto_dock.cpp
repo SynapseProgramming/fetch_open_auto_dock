@@ -57,10 +57,10 @@ AutoDocking::~AutoDocking()
 
 
 
-void AutoDocking::dockCallback(const fetch_auto_dock_msgs::DockGoalConstPtr& goal)
+void AutoDocking::dockCallback(const fetch_open_auto_dock::DockGoalConstPtr& goal)
 {
-  fetch_auto_dock_msgs::DockFeedback feedback;
-  fetch_auto_dock_msgs::DockResult result;
+  fetch_open_auto_dock::DockFeedback feedback;
+  fetch_open_auto_dock::DockResult result;
 
   // Reset flags.
   result.docked = false;
@@ -192,7 +192,7 @@ void AutoDocking::dockCallback(const fetch_auto_dock_msgs::DockGoalConstPtr& goa
  * @param result Dock result message used to set the dock action server state.
  * @return True if we have neither succeeded nor failed to dock.
  */
-bool AutoDocking::continueDocking(fetch_auto_dock_msgs::DockResult& result)
+bool AutoDocking::continueDocking(fetch_open_auto_dock::DockResult& result)
 {
   // If charging, stop and return success.
   if (charging_)
@@ -377,13 +377,13 @@ bool AutoDocking::isApproachBad(double & dock_yaw)
 }
 
 
-void AutoDocking::undockCallback(const fetch_auto_dock_msgs::UndockGoalConstPtr& goal)
+void AutoDocking::undockCallback(const fetch_open_auto_dock::UndockGoalConstPtr& goal)
 {
 
 
 
-  fetch_auto_dock_msgs::UndockFeedback feedback;
-  fetch_auto_dock_msgs::UndockResult result;
+  fetch_open_auto_dock::UndockFeedback feedback;
+  fetch_open_auto_dock::UndockResult result;
   result.undocked = false;
 
   // Distances to backup/turn

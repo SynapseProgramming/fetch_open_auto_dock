@@ -23,7 +23,6 @@
   <depend>actionlib</depend>
   <depend>actionlib_msgs</depend>
   <depend>eigen</depend>
-  <depend>fetch_auto_dock_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>nav_msgs</depend>
   <depend>roscpp</depend>

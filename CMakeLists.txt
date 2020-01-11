@@ -10,7 +10,6 @@ find_package(catkin REQUIRED
     actionlib
     actionlib_msgs
     angles
-    fetch_auto_dock_msgs
     geometry_msgs
     nav_msgs
     message_generation
@@ -41,7 +40,6 @@ catkin_package(
   CATKIN_DEPENDS
     actionlib
     actionlib_msgs
-    fetch_auto_dock_msgs
     geometry_msgs
     message_runtime
     nav_msgs
@@ -75,6 +73,7 @@ target_link_libraries(auto_dock
 
 add_dependencies(auto_dock
   ${catkin_EXPORTED_TARGETS}
+  ${fetch_open_auto_dock_EXPORTED_TARGETS}
 )
 
 

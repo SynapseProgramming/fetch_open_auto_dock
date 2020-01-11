@@ -5,7 +5,7 @@
 
 import rospy
 import actionlib
-from fetch_auto_dock_msgs.msg import UndockAction, UndockGoal
+from fetch_open_auto_dock.msg import UndockAction, UndockGoal
 
 # Create a ROS node
 rospy.init_node("undock_the_robot")
