@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import rospy
 import actionlib
-from fetch_auto_dock_msgs.msg import DockAction, DockGoal
+from fetch_open_auto_dock.msg import DockAction, DockGoal
 
 # Create a ROS node
 rospy.init_node("dock_the_robot")

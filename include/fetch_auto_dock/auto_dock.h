@@ -30,16 +30,13 @@
 #include <actionlib/client/simple_action_client.h>
 
 // Fetch Includes.
-#include <fetch_driver_msgs/RobotState.h>
-#include <fetch_driver_msgs/DisableChargingAction.h>
-#include <fetch_auto_dock_msgs/DockAction.h>
-#include <fetch_auto_dock_msgs/UndockAction.h>
+#include <fetch_open_auto_dock/DockAction.h>
+#include <fetch_open_auto_dock/UndockAction.h>
 
 class AutoDocking
 {
-  typedef actionlib::SimpleActionClient<fetch_driver_msgs::DisableChargingAction> charge_lockout_client_t;
-  typedef actionlib::SimpleActionServer<fetch_auto_dock_msgs::DockAction> dock_server_t;
-  typedef actionlib::SimpleActionServer<fetch_auto_dock_msgs::UndockAction> undock_server_t;
+  typedef actionlib::SimpleActionServer<fetch_open_auto_dock::DockAction> dock_server_t;
+  typedef actionlib::SimpleActionServer<fetch_open_auto_dock::UndockAction> undock_server_t;
 
 public:
   /**
@@ -56,14 +53,14 @@ private:
    * @brief Method to execute the docking behavior.
    * @param goal Initial pose estimate of the dock.
    */
-  void dockCallback(const fetch_auto_dock_msgs::DockGoalConstPtr& goal);
+  void dockCallback(const fetch_open_auto_dock::DockGoalConstPtr& goal);
 
   /**
    * @brief Method that checks success or failure of docking.
    * @param result Dock result message used to set the dock action server state.
    * @return True if we have neither succeeded nor failed to dock.
    */
-  bool continueDocking(fetch_auto_dock_msgs::DockResult& result);
+  bool continueDocking(fetch_open_auto_dock::DockResult& result);
 
   /**
    * @brief Method to see if the robot seems to be docked but not charging.
@@ -76,7 +73,7 @@ private:
    * @brief Method to execute the undocking behavior.
    * @param goal Docking control action for rotating off of the goal.
    */
-  void undockCallback(const fetch_auto_dock_msgs::UndockGoalConstPtr& goal);
+  void undockCallback(const fetch_open_auto_dock::UndockGoalConstPtr& goal);
 
   /**
    * @brief Method sets the docking deadline and number of retries.
@@ -116,14 +113,6 @@ private:
    */
   bool isApproachBad(double & dock_yaw);
 
-  /**
-   * @brief Method to disable the charger for a finite amount of time.
-   * @param seconds Number of seconds to disable the charger for. Maximum
-   *                number of seconds is 255. Zero seconds enables the charger.
-   * @return True if the number of seconds is valid and the lockout request was
-   *         successful.
-   */
-  bool lockoutCharger(unsigned seconds);
 
   // Configuration Constants.
   int NUM_OF_RETRIES_;                        // Number of times the robot gets to attempt
@@ -136,14 +125,13 @@ private:
   ros::NodeHandle nh_;
   dock_server_t dock_;                        // Action server to manage docking.
   undock_server_t undock_;                    // Action server to manage undocking.
-  charge_lockout_client_t charge_lockout_;    // Action client to request charger lockouts.
+
 
   // Helper objects.
   BaseController controller_;  // Drives the robot during docking and undocking phases.
   DockPerception perception_;  // Used to detect dock pose.
 
-  // Subscribe to robot_state, determine if charging
-  ros::Subscriber state_;
+  // determine if charging
   bool charging_;
 
   // Failure detection

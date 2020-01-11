@@ -8,11 +8,11 @@ endif()
 find_package(catkin REQUIRED
   COMPONENTS
     actionlib
+    actionlib_msgs
     angles
-    fetch_auto_dock_msgs
-    fetch_driver_msgs
     geometry_msgs
     nav_msgs
+    message_generation
     roslib
     roscpp
     rospy
@@ -22,13 +22,26 @@ find_package(catkin REQUIRED
 )
 find_package(Eigen3 REQUIRED)
 
+add_action_files(
+  FILES
+    Dock.action
+    Undock.action
+)
+
+generate_messages(
+  DEPENDENCIES
+    actionlib_msgs
+    geometry_msgs
+)
+
+
 catkin_package(
   INCLUDE_DIRS include
   CATKIN_DEPENDS
     actionlib
-    fetch_auto_dock_msgs
-    fetch_driver_msgs
+    actionlib_msgs
     geometry_msgs
+    message_runtime
     nav_msgs
     roslib
     roscpp
@@ -60,6 +73,7 @@ target_link_libraries(auto_dock
 
 add_dependencies(auto_dock
   ${catkin_EXPORTED_TARGETS}
+  ${fetch_open_auto_dock_EXPORTED_TARGETS}
 )
 
 

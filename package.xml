@@ -21,9 +21,8 @@
   <build_depend>angles</build_depend>
 
   <depend>actionlib</depend>
+  <depend>actionlib_msgs</depend>
   <depend>eigen</depend>
-  <depend>fetch_auto_dock_msgs</depend>
-  <depend>fetch_driver_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>nav_msgs</depend>
   <depend>roscpp</depend>
@@ -32,5 +31,7 @@
   <depend>sensor_msgs</depend>
   <depend>std_msgs</depend>
   <depend>tf</depend>
+  <build_export_depend>message_runtime</build_export_depend>
+  <exec_depend>message_runtime</exec_depend>
   
 </package>
