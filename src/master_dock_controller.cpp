@@ -5,7 +5,7 @@
 
 #include <fetch_open_auto_dock/DockAction.h>
 #include <fetch_open_auto_dock/UndockAction.h>
-
+#include <move_base_msgs/MoveBaseAction.h>
 
 class docking_undocking_interface{
   typedef actionlib::SimpleActionClient<fetch_open_auto_dock::DockAction> dock_client_type;
@@ -31,7 +31,7 @@ fetch_open_auto_dock::DockGoal goal;
 ROS_INFO("sending robot to dock!");
 //populate the dock goal with data.
 goal.dock_pose.header.frame_id = "base_link";
-goal.dock_pose.pose.position.x = 2.0; //TODO maybe make this dynamically reconfigurable
+goal.dock_pose.pose.position.x = 1.8; //TODO maybe make this dynamically reconfigurable
 goal.dock_pose.pose.orientation.x = 0.0;
 goal.dock_pose.pose.orientation.y = 0.0;
 goal.dock_pose.pose.orientation.z = 0.0;
@@ -75,7 +75,7 @@ undock_client_type::SimpleActiveCallback(), undock_client_type::SimpleFeedbackCa
 void undock_result(const actionlib::SimpleClientGoalState& state,const fetch_open_auto_dock::UndockResultConstPtr &result){
 std::cout<<"The status of undocking is: "<< state.toString().c_str() <<std::endl;
 if(result->undocked==true){
-std::cout <<"Successfully Unocked!"<<std::endl;
+std::cout <<"Successfully Undocked!"<<std::endl;
 docked=false;
 }
 else{
@@ -84,13 +84,6 @@ docked=false;
 }
   }
 
-
-
-
-
-
-
-
 private:
   dock_client_type dock_client;
   undock_client_type undock_client;
@@ -98,6 +91,61 @@ private:
 
 };
 
+class move_base_controller{
+
+typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> movebAC;
+public:
+move_base_controller():
+ac("move_base",true)
+{
+g_reached=false;
+std::cout<<"move base controller initialised!\nWaiting for move_base server to start!"<<std::endl;
+ac.waitForServer();
+std::cout<<"move base server is online!"<<std::endl;
+}
+
+void movebase_send_goal(double x, double y, double z,double w){
+  //create the move base goal variable.
+  move_base_msgs::MoveBaseGoal goal;
+  //populate the goal with data.
+  goal.target_pose.header.frame_id="map";
+  goal.target_pose.header.stamp=ros::Time::now();
+
+  goal.target_pose.pose.position.x=x;
+  goal.target_pose.pose.position.y=y;
+  goal.target_pose.pose.orientation.w=w;
+  goal.target_pose.pose.orientation.z=z;
+
+  //send the goal to move base!
+  ac.sendGoal(goal,boost::bind(&move_base_controller::donecb, this, _1, _2),movebAC::SimpleActiveCallback(), movebAC::SimpleFeedbackCallback());
+  g_reached=false;
+}//bracket of movebase_send_goal
+
+void donecb(const actionlib::SimpleClientGoalState &state, const move_base_msgs::MoveBaseResultConstPtr &result){
+//Print out the current state.
+std::cout<<"Status:"<<state.toString()<<std::endl;
+//Statements to print upon sucessfully reaching the goal.
+if(state.toString()=="SUCCEEDED"){
+std::cout<<"The goal has been reached!"<<std::endl;
+//declare goal reached as true.
+g_reached=true;
+}
+else{g_reached=false;
+std::cout<<"Something went wrong! the bot could not reach the near goal!"<<std::endl;
+}
+
+}//bracket of donecb
+
+bool get_goal_state(){
+return g_reached;
+}
+
+private:
+//create the action client object,specifying the name of the action server.
+movebAC ac;
+bool g_reached;
+
+};
 
 
 
@@ -131,16 +179,21 @@ int main(int argc, char **argv){
 ros::init(argc,argv,"master_docking_controller");
 int input;
 docking_undocking_interface dud;
+move_base_controller nav;
 //master_controller object;
 while(ros::ok()){
 std::cout<<"please press and enter 1 to send a dock goal to the dock server."<<std::endl;
 std::cout<<"please press and enter 2 to send a dock goal to the dock server."<<std::endl;
+std::cout<<"please press and enter 3 to move the bot to a close goal."<<std::endl;
 std::cin >>input;
 if(input==1){
 dud.dock_robot();
 }
 else if(input==2){
 dud.undock_robot();
+}
+else if(input==3){
+nav.movebase_send_goal(-0.042,-0.150,-0.709,0.705);
 }
 ros::spinOnce();
 }
