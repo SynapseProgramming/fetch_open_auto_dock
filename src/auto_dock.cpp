@@ -38,17 +38,33 @@ AutoDocking::AutoDocking() :
 {
   // Load ros parameters
   ros::NodeHandle pnh("~");
-  pnh.param("abort_distance",                    abort_distance_,                    0.59); // original 0.4
-  pnh.param("abort_threshold",                   abort_threshold_,                   0.025); // original 0.025 m
-  pnh.param("abort_angle",                       abort_angle_,                       5.0*(M_PI/180.0)), //original 5.0 degrees
-  pnh.param("num_of_retries",                    NUM_OF_RETRIES_,                    5);
-  pnh.param("dock_connector_clearance_distance", DOCK_CONNECTOR_CLEARANCE_DISTANCE_, 0.2);
-  pnh.param("docked_distance_threshold",         DOCKED_DISTANCE_THRESHOLD_,         0.34);
+  if(
+    pnh.getParam("abort_distance",                    abort_distance_)!=true // original 0.59
+  ||pnh.getParam("abort_threshold",                   abort_threshold_)!=true // original 0.025 m
+  ||pnh.getParam("abort_angle",                       abort_angle_)!=true //original 5.0*(M_PI/180.0) degrees
+  ||pnh.getParam("num_of_retries",                    NUM_OF_RETRIES_)!=true// original 5
+  ||pnh.getParam("dock_connector_clearance_distance", DOCK_CONNECTOR_CLEARANCE_DISTANCE_)!=true//original 0.2
+  ||pnh.getParam("docked_distance_threshold",         DOCKED_DISTANCE_THRESHOLD_)!=true // original 0.34
+    )
+{ROS_ERROR("yaml parameters could not be loaded! please check the docking_parameters.yaml file!");}
+
+else{
+ROS_INFO("Parameters Loaded!");
+// Start action server thread
+dock_.start();
+undock_.start();
+
+//print out the value of the loaded variables
+std::cout<<"abort_distance: "<<abort_distance_<<std::endl;
+std::cout<<"abort_threshold: "<<abort_threshold_<<std::endl;
+std::cout<<"abort_angle: "<<abort_angle_<<std::endl;
+std::cout<<"num_of_retries: "<<NUM_OF_RETRIES_<<std::endl;
+std::cout<<"dock_connector_clearance_distance: "<<DOCK_CONNECTOR_CLEARANCE_DISTANCE_<<std::endl;
+std::cout<<"docked_distance_threshold: "<<DOCKED_DISTANCE_THRESHOLD_<<std::endl;
+
+}
 
 
-  // Start action server thread
-  dock_.start();
-  undock_.start();
 }
 
 AutoDocking::~AutoDocking()
