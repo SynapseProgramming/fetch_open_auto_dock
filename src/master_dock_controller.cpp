@@ -162,7 +162,7 @@ sub(n.subscribe<std_msgs::Float32>("battery_voltage",5,&master_controller::updat
 if(
 n.getParam("upper_battery_threshold",upper_battery_threshold)!=true
 ||n.getParam("low_battery_threshold",low_battery_threshold)!=true
-||n.getParam("gx",gx)!=true // -0.159,-0.700,-0.700,0.714
+||n.getParam("gx",gx)!=true 
 ||n.getParam("gy",gy)!=true
 ||n.getParam("gz",gz)!=true
 ||n.getParam("gw",gw)!=true
@@ -178,8 +178,7 @@ else{
   print_params();
   check_logic();
 }
-//low_battery_threshold=23; //TODO add yaml reconfigure options for these variables later.
-//upper_battery_threshold=25;
+
 
 }
 
@@ -198,7 +197,6 @@ void updatevoltage(const std_msgs::Float32::ConstPtr &msg){
 current_voltage=msg->data;
 if(current_voltage>=upper_battery_threshold){charged=true;}
 else if(current_voltage<low_battery_threshold){charged=false;}
-//print_current_voltage();
 
 }
 
