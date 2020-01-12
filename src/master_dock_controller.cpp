@@ -25,13 +25,13 @@ ROS_INFO("both dock and undock server have started!");
 }
 
 //method sends a goal to dock the robot at the charging dock.
-void dock_robot(){
+void dock_robot(double dock_dist){
 //we will create a goal
 fetch_open_auto_dock::DockGoal goal;
 ROS_INFO("sending robot to dock!");
 //populate the dock goal with data.
 goal.dock_pose.header.frame_id = "base_link";
-goal.dock_pose.pose.position.x = 1.0; //TODO maybe make this dynamically reconfigurable
+goal.dock_pose.pose.position.x = dock_dist;
 goal.dock_pose.pose.orientation.x = 0.0;
 goal.dock_pose.pose.orientation.y = 0.0;
 goal.dock_pose.pose.orientation.z = 0.0;
@@ -159,13 +159,39 @@ public:
 master_controller():
 sub(n.subscribe<std_msgs::Float32>("battery_voltage",5,&master_controller::updatevoltage,this))
 {
-current_voltage=30; //will start off with a high initial charge.
-low_battery_threshold=23; //TODO add yaml reconfigure options for these variables later.
-upper_battery_threshold=25;
-charged=true;
-stage=0;
-ROS_INFO("master controller initalized.");
-check_logic();
+if(
+n.getParam("upper_battery_threshold",upper_battery_threshold)!=true
+||n.getParam("low_battery_threshold",low_battery_threshold)!=true
+||n.getParam("gx",gx)!=true // -0.159,-0.700,-0.700,0.714
+||n.getParam("gy",gy)!=true
+||n.getParam("gz",gz)!=true
+||n.getParam("gw",gw)!=true
+||n.getParam("init_dock_estimate",init_dock_estimate)!=true
+){
+ROS_ERROR("Error loading yaml parameters. check yaml file.");
+}
+else{
+  current_voltage=30; //will start off with a high initial charge.
+  charged=true;
+  stage=0;
+  ROS_INFO("master controller initalized.");
+  print_params();
+  check_logic();
+}
+//low_battery_threshold=23; //TODO add yaml reconfigure options for these variables later.
+//upper_battery_threshold=25;
+
+}
+
+void print_params(){
+std::cout<<"upper_battery_threshold: "<<upper_battery_threshold<<std::endl;
+std::cout<<"low_battery_threshold: "<<low_battery_threshold<<std::endl;
+std::cout<<"gx: "<<gx<<std::endl;
+std::cout<<"gy: "<<gy<<std::endl;
+std::cout<<"gz: "<<gz<<std::endl;
+std::cout<<"gw: "<<gw<<std::endl;
+std::cout<<"init_dock_estimate: "<<init_dock_estimate<<std::endl;
+
 }
 
 void updatevoltage(const std_msgs::Float32::ConstPtr &msg){
@@ -190,13 +216,13 @@ void check_logic(){
     //if the robot is running around and has not docked, and its battery is low, we will move to the near goal first.
     if(charged==false&&dock_undock_bot.get_dock_status()==false&&stage==0){
     ROS_INFO("battery is low. sending robot to near goal for docking!");
-    move_base.movebase_send_goal(-0.159,-0.700,-0.700,0.714);
+    move_base.movebase_send_goal(gx,gy,gz,gw);
     stage=1;
     }
     // if the robot has reached the near goal, wait for 1 sec for robot to fully stop. Then send in the robot to dock.
     else if(stage==1&&move_base.get_goal_state()==true){
     ros::Duration(1.0).sleep();
-    dock_undock_bot.dock_robot();
+    dock_undock_bot.dock_robot(init_dock_estimate);
     stage=2;
     }
     //around this point the robot should begin to start charging its batteries. will wait here till the voltage has reached the upper threshold. hehe.
@@ -218,13 +244,14 @@ void check_logic(){
 
 private:
 
-
 move_base_controller move_base;
 docking_undocking_interface dock_undock_bot;
 
 ros::NodeHandle n;
 ros::Subscriber sub;
 
+double init_dock_estimate;
+double gx, gy, gz, gw; // near move base goal parameters
 double current_voltage;
 double low_battery_threshold;
 double upper_battery_threshold;
