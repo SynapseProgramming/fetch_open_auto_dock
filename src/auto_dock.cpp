@@ -180,7 +180,7 @@ void AutoDocking::dockCallback(const fetch_open_auto_dock::DockGoalConstPtr& goa
 
           std::cout<<"Distance to dock: "<<dock_x_distance.pose.position.x<<std::endl;
           //remember to replace 0.55 with a reconfigurable parameter
-          if(dock_x_distance.pose.position.x <=0.55){charging_=true;}
+          if(dock_x_distance.pose.position.x <= DOCKED_DISTANCE_THRESHOLD_){charging_=true;}
           else{charging_=false;}
           // Update control
           controller_.approach(feedback.dock_pose);
