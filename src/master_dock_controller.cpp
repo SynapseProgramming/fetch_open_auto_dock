@@ -31,7 +31,7 @@ fetch_open_auto_dock::DockGoal goal;
 ROS_INFO("sending robot to dock!");
 //populate the dock goal with data.
 goal.dock_pose.header.frame_id = "base_link";
-goal.dock_pose.pose.position.x = 1.8; //TODO maybe make this dynamically reconfigurable
+goal.dock_pose.pose.position.x = 1.0; //TODO maybe make this dynamically reconfigurable
 goal.dock_pose.pose.orientation.x = 0.0;
 goal.dock_pose.pose.orientation.y = 0.0;
 goal.dock_pose.pose.orientation.z = 0.0;
@@ -84,6 +84,11 @@ docked=false;
 }
   }
 
+//method returns the current dock status. true being docked, false being undocked.
+bool get_dock_status(){
+return docked;
+}
+
 private:
   dock_client_type dock_client;
   undock_client_type undock_client;
@@ -101,7 +106,7 @@ ac("move_base",true)
 g_reached=false;
 std::cout<<"move base controller initialised!\nWaiting for move_base server to start!"<<std::endl;
 ac.waitForServer();
-std::cout<<"move base server is online!"<<std::endl;
+ROS_INFO("move base server is online!");
 }
 
 void movebase_send_goal(double x, double y, double z,double w){
@@ -154,51 +159,84 @@ public:
 master_controller():
 sub(n.subscribe<std_msgs::Float32>("battery_voltage",5,&master_controller::updatevoltage,this))
 {
-current_voltage=30;
+current_voltage=30; //will start off with a high initial charge.
+low_battery_threshold=23; //TODO add yaml reconfigure options for these variables later.
+upper_battery_threshold=25;
+charged=true;
+stage=0;
 ROS_INFO("master controller initalized.");
+check_logic();
 }
 
 void updatevoltage(const std_msgs::Float32::ConstPtr &msg){
 current_voltage=msg->data;
-print_current_voltage();
+if(current_voltage>=upper_battery_threshold){charged=true;}
+else if(current_voltage<low_battery_threshold){charged=false;}
+//print_current_voltage();
+
 }
 
+//print function mostly used for debugging.
 void print_current_voltage(){
-std::cout<<"The current battery voltage is: "<<current_voltage<<std::endl;
+  std::cout<<"The current battery voltage is: "<<current_voltage<<std::endl;
+  if(charged==true){std::cout<<"charge is true"<<std::endl;}
+  else{std::cout<<"charge is false."<<std::endl;}
+}
+
+//main control and logic found here
+void check_logic(){
+  ros::Rate loop_rate(60);
+  while(ros::ok()){
+    //if the robot is running around and has not docked, and its battery is low, we will move to the near goal first.
+    if(charged==false&&dock_undock_bot.get_dock_status()==false&&stage==0){
+    ROS_INFO("battery is low. sending robot to near goal for docking!");
+    move_base.movebase_send_goal(-0.159,-0.700,-0.700,0.714);
+    stage=1;
+    }
+    // if the robot has reached the near goal, wait for 1 sec for robot to fully stop. Then send in the robot to dock.
+    else if(stage==1&&move_base.get_goal_state()==true){
+    ros::Duration(1.0).sleep();
+    dock_undock_bot.dock_robot();
+    stage=2;
+    }
+    //around this point the robot should begin to start charging its batteries. will wait here till the voltage has reached the upper threshold. hehe.
+    //once the robot has docked and charged up its batteries to the upper threshold, then we will undock the robot.
+    else if(stage==2&&dock_undock_bot.get_dock_status()==true&&charged==true){
+    dock_undock_bot.undock_robot();
+    ROS_INFO("docking sequence completed. Awaiting low battery to repeat.");
+    stage=0; //reset stage so we an rinse and repeat.
+    }
+
+
+
+
+    loop_rate.sleep();
+    ros::spinOnce();
+    }
+
 }
 
 private:
+
+
+move_base_controller move_base;
+docking_undocking_interface dock_undock_bot;
+
 ros::NodeHandle n;
 ros::Subscriber sub;
-double current_voltage;
 
+double current_voltage;
+double low_battery_threshold;
+double upper_battery_threshold;
+bool charged; // charge status of battery. true=charged false=low charge
+int stage;
 };
 
 
 int main(int argc, char **argv){
 ros::init(argc,argv,"master_docking_controller");
-int input;
-docking_undocking_interface dud;
-move_base_controller nav;
-//master_controller object;
-while(ros::ok()){
-std::cout<<"please press and enter 1 to send a dock goal to the dock server."<<std::endl;
-std::cout<<"please press and enter 2 to send a dock goal to the dock server."<<std::endl;
-std::cout<<"please press and enter 3 to move the bot to a close goal."<<std::endl;
-std::cin >>input;
-if(input==1){
-dud.dock_robot();
-}
-else if(input==2){
-dud.undock_robot();
-}
-else if(input==3){
-nav.movebase_send_goal(-0.042,-0.150,-0.709,0.705);
-}
-ros::spinOnce();
-}
 
+master_controller object;
 
-
-//ros::spin();
-return 0;}
+return 0;
+}
