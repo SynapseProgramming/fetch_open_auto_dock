@@ -1,7 +1,7 @@
 # Lidar Based Auto Docking
 
 General autodocking package for ROS based robots. hehe. :)
-**Note: your dock must have the same cross sectional dimensions as the fetch charging dock.stl file.  Front face is 300mm long, Each side is 100mm long, at 45 degree angle **
+Note: your dock must have the same cross sectional dimensions as the fetch charging dock.stl file.  Front face is 300mm long, Each side is 100mm long, at 45 degree angle
 
 # Setup/Installation
  * Firstly, clone this package into your catkin/src folder using git clone. 
