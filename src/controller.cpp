@@ -34,8 +34,8 @@ BaseController::BaseController(ros::NodeHandle& nh)
   // TODO(enhancement): these should be loaded from ROS params
   k1_ = 3;
   k2_ = 2;
-  min_velocity_ = 0.15;
-  max_velocity_ = 0.15;
+  min_velocity_ = 0.05;
+  max_velocity_ = 0.05;
   max_angular_velocity_ = 2.0;
   beta_ = 0.2;
   lambda_ = 2.0;

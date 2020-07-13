@@ -8,8 +8,8 @@
   <!--launch docking and undocking servers-->
   <node name="auto_dock" pkg="fetch_open_auto_dock" type="auto_dock" output="screen" >
   <rosparam file="$(find fetch_open_auto_dock)/params/docking_parameters.yaml" command="load"/>
-  <remap from="base_scan" to="scan" />
-  <remap from="cmd_vel" to="cmd_vel" />
+  <remap from="base_scan" to="scan_unfiltered" />
+  <remap from="cmd_vel" to="dock_cmd_vel" />
 
   </node>
 
