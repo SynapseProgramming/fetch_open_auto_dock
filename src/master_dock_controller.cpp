@@ -196,7 +196,7 @@ std::cout<<"init_dock_estimate: "<<init_dock_estimate<<std::endl;
 void updatevoltage(const std_msgs::Float32::ConstPtr &msg){
 current_voltage=msg->data;
 if(current_voltage>=upper_battery_threshold){charged=true;}
-else if(current_voltage<low_battery_threshold){charged=false;}
+else if(current_voltage<low_battery_threshold && current_voltage>5){charged=false;}
 
 }
 

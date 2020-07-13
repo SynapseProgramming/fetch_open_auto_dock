@@ -13,7 +13,7 @@ print("server started!")
 # Create and send a goal
 goal = DockGoal()
 goal.dock_pose.header.frame_id = "base_link"
-goal.dock_pose.pose.position.x = 2.0
+goal.dock_pose.pose.position.x = 1.5
 goal.dock_pose.pose.orientation.x = 0.0
 goal.dock_pose.pose.orientation.y = 0.0
 goal.dock_pose.pose.orientation.z = 0.0

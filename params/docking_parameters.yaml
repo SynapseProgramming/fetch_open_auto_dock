@@ -4,13 +4,13 @@
 # distance refers to the distance between the front flat surface of the dock and base_link (same as lidar frame for transporter)
 # this distance should be set at a distance where the robot is almost going into the dock.
 # For the transporter, this value can be obtained by looking at the average front lidar distance.
-abort_distance: 0.59
+abort_distance: 0.40
 
 # Y-offset that triggers abort in (m)
-abort_threshold: 0.025
+abort_threshold: 0.04
 
 #Angle offset that triggers abort in (rad) current value is 5 degrees.
-abort_angle: 0.087266
+abort_angle: 0.18
 
 # The number of times the robot gets to retry docking before failing
 num_of_retries: 5
@@ -20,19 +20,19 @@ dock_connector_clearance_distance: 0.3
 
 # The distance (m) between base_link and the front flat surface of the dock which indicates that the robot has docked.
 # For the transporter, this value can be obtained by looking at the average front lidar distance.
-docked_distance_threshold: 0.34
+docked_distance_threshold: 0.33
 
 #battery voltage (V) which indicates it is sufficiently charged. Will activate undocking sequence.
-upper_battery_threshold: 25.0
+upper_battery_threshold: 22.2
 
 #battery voltage (V) which indicates battery is low. Will send the robot to dock.
-low_battery_threshold: 24.0
+low_battery_threshold: 22.01
 
 # near goal coordinate values. gx, gy are the translation values from map to base_link gz gw are the rotation values in quaternions
-gx: -0.159
-gy: -0.700
-gz: -0.700
-gw: 0.714
+gx: 0.835 #2.130
+gy: -2.94 #0.69
+gz: -0.999 #0.681
+gw: -0.13 #0.732
 
 # distance in (m) between base_link and the front flat surface of the dock while the robot is at the near goal. 
 init_dock_estimate: 1.0
