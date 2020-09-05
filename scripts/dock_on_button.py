@@ -12,10 +12,19 @@ client.wait_for_server()
 print("server started!")
 # Create and send a goal
 goal = DockGoal()
-goal.dock_pose.header.frame_id = "base_link"
-goal.dock_pose.pose.position.x = 1.5
+#goal.dock_pose.header.frame_id = "base_link"
+#goal.dock_pose.pose.position.x = 1.5
+#goal.dock_pose.pose.orientation.x = 0.0
+#goal.dock_pose.pose.orientation.y = 0.0
+#goal.dock_pose.pose.orientation.z = 0.0
+#goal.dock_pose.pose.orientation.w = 0.0
+
+goal.dock_pose.header.frame_id = "map"
+goal.dock_pose.pose.position.x = 0
+goal.dock_pose.pose.position.y = -2
+goal.dock_pose.pose.position.z = 0
 goal.dock_pose.pose.orientation.x = 0.0
 goal.dock_pose.pose.orientation.y = 0.0
-goal.dock_pose.pose.orientation.z = 0.0
-goal.dock_pose.pose.orientation.w = 0.0
+goal.dock_pose.pose.orientation.z = -0.70682
+goal.dock_pose.pose.orientation.w = 0.707388
 client.send_goal(goal)
