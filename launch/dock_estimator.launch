@@ -2,15 +2,11 @@
 <launch>
   <!--launch controller -->
   <rosparam file="$(find fetch_open_auto_dock)/params/docking_parameters.yaml" command="load"/>
-  <!--<node name="auto_dock_controller" pkg="fetch_open_auto_dock" type="master_dock_controller" output="screen" />-->
 
-
-  <!--launch docking and undocking servers-->
+  <!--launch dock estimator-->
   <node name="dock_estimator" pkg="fetch_open_auto_dock" type="init_dock_estimate" output="screen" >
-  <!--<rosparam file="$(find fetch_open_auto_dock)/params/docking_parameters.yaml" command="load"/>-->
   <!--<remap from="base_scan" to="scan_unfiltered" />-->
   <remap from="base_scan" to="scan" />
-  <!--<remap from="cmd_vel" to="dock_cmd_vel" />-->
 
   </node>
 
