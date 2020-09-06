@@ -68,11 +68,23 @@ add_executable(auto_dock
 
 add_executable(master_dock_controller src/master_dock_controller.cpp)
 
+add_executable(init_dock_estimate 
+src/init_dock_estimate.cpp
+src/icp_2d.cpp
+src/laser_processor.cpp
+src/perception.cpp
+src/linear_pose_filter_2d.cpp
+)
+
 target_link_libraries(auto_dock
   ${catkin_LIBRARIES}
 )
 
 target_link_libraries(master_dock_controller
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(init_dock_estimate
   ${catkin_LIBRARIES}
 )
 
@@ -86,6 +98,12 @@ add_dependencies(master_dock_controller
   ${catkin_EXPORTED_TARGETS}
   ${fetch_open_auto_dock_EXPORTED_TARGETS}
 )
+
+add_dependencies(init_dock_estimate
+  ${catkin_EXPORTED_TARGETS}
+  ${fetch_open_auto_dock_EXPORTED_TARGETS}
+)
+
 
 
 if (CATKIN_ENABLE_TESTING)

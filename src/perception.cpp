@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+#include <iostream>
 #include <fetch_auto_dock/icp_2d.h>
 #include <fetch_auto_dock/perception.h>
 
@@ -123,9 +123,10 @@ bool DockPerception::getPose(geometry_msgs::PoseStamped& pose, std::string frame
   // All of this requires a lock on the dock_
   boost::mutex::scoped_lock lock(dock_mutex_);
 
-  if (!found_dock_)
+  if (!found_dock_){
     return false;
 
+  }
   if (ros::Time::now() > dock_stamp_ + ros::Duration(0.35))
   {
     ROS_DEBUG_NAMED("dock_perception", "Dock pose timed out");
@@ -173,7 +174,7 @@ bool DockPerception::getPose(geometry_msgs::PoseStamped& pose, std::string frame
 }
 
 void DockPerception::callback(const sensor_msgs::LaserScanConstPtr& scan)
-{
+{ 
   // Be lazy about search
   if (!running_)
   {
