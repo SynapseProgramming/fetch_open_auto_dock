@@ -19,6 +19,7 @@ find_package(catkin REQUIRED
     std_msgs
     sensor_msgs
     tf
+    tf2
 )
 find_package(Eigen3 REQUIRED)
 
@@ -49,6 +50,7 @@ catkin_package(
     sensor_msgs
     std_msgs
     tf
+    tf2
 )
 
 include_directories(

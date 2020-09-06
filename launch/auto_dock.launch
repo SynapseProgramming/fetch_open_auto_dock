@@ -2,7 +2,7 @@
 <launch>
   <!--launch controller -->
   <rosparam file="$(find fetch_open_auto_dock)/params/docking_parameters.yaml" command="load"/>
-  <!--<node name="auto_dock_controller" pkg="fetch_open_auto_dock" type="master_dock_controller" output="screen" />-->
+  <node name="auto_dock_controller" pkg="fetch_open_auto_dock" type="master_dock_controller" output="screen" />
 
 
   <!--launch docking and undocking servers-->
