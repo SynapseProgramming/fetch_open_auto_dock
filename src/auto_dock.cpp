@@ -134,7 +134,7 @@ void AutoDocking::dockCallback(const fetch_open_auto_dock::DockGoalConstPtr& goa
 
 
     // Preorient the robot towards the dock.
-    while (!controller_.backup(0.0, -dock_yaw) &&
+    while (!controller_.backup(0.0, dock_yaw) &&
            continueDocking(result)             &&
            ros::ok()
            )

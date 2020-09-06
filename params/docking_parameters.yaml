@@ -4,13 +4,13 @@
 # distance refers to the distance between the front flat surface of the dock and base_link (same as lidar frame for transporter)
 # this distance should be set at a distance where the robot is almost going into the dock.
 # For the transporter, this value can be obtained by looking at the average front lidar distance.
-abort_distance: 0.40
+abort_distance: 0.60
 
 # Y-offset that triggers abort in (m)
 abort_threshold: 0.04
 
 #Angle offset that triggers abort in (rad) current value is 5 degrees.
-abort_angle: 0.18
+abort_angle: 0.087
 
 # The number of times the robot gets to retry docking before failing
 num_of_retries: 5
@@ -20,7 +20,8 @@ dock_connector_clearance_distance: 0.3
 
 # The distance (m) between base_link and the front flat surface of the dock which indicates that the robot has docked.
 # For the transporter, this value can be obtained by looking at the average front lidar distance.
-docked_distance_threshold: 0.33
+#docked_distance_threshold: 0.33
+docked_distance_threshold: 0.55
 
 #battery voltage (V) which indicates it is sufficiently charged. Will activate undocking sequence.
 upper_battery_threshold: 22.2
@@ -29,10 +30,14 @@ upper_battery_threshold: 22.2
 low_battery_threshold: 22.01
 
 # near goal coordinate values. gx, gy are the translation values from map to base_link gz gw are the rotation values in quaternions
-gx: 0.835 #2.130
-gy: -2.94 #0.69
-gz: -0.999 #0.681
-gw: -0.13 #0.732
+gx: -0.190
+gy: -0.472
+gz: -0.716
+gw: 0.698
 
-# distance in (m) between base_link and the front flat surface of the dock while the robot is at the near goal. 
-init_dock_estimate: 1.0
+# estimated translation from map frame to dock frame. dx, dy are the translation values from map to base_link dz dw are the rotation values in quaternions
+
+dx: -0.0298665
+dy: -1.94136
+dz: -0.706586
+dw: 0.707627
