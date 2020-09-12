@@ -135,6 +135,7 @@ bool DockPerception::getPose(geometry_msgs::PoseStamped& pose, std::string frame
 
   // Check for a valid orientation.
   tf::Quaternion q;
+  //change here
   tf::quaternionMsgToTF(dock_.pose.orientation, q);
   if (!isValid(q))
   {
@@ -174,7 +175,7 @@ bool DockPerception::getPose(geometry_msgs::PoseStamped& pose, std::string frame
 }
 
 void DockPerception::callback(const sensor_msgs::LaserScanConstPtr& scan)
-{ 
+{
   // Be lazy about search
   if (!running_)
   {
@@ -422,7 +423,7 @@ double DockPerception::fit(const DockCandidatePtr& candidate, geometry_msgs::Pos
 
   // Initial yaw. Presumably the initial goal orientation estimate.
   tf::Quaternion init_pose, cand_pose;
-  quaternionMsgToTF(pose.orientation, init_pose);
+  tf::quaternionMsgToTF(pose.orientation, init_pose);
   if (!isValid(init_pose))
   {
     ROS_ERROR_STREAM_NAMED("perception",
@@ -439,7 +440,7 @@ double DockPerception::fit(const DockCandidatePtr& candidate, geometry_msgs::Pos
 
   // ICP the dock
   double fitness = icp_2d::alignICP(ideal_cloud_, candidate->points, transform);
-  quaternionMsgToTF(transform.rotation, cand_pose);
+  tf::quaternionMsgToTF(transform.rotation, cand_pose);
   if (!isValid(cand_pose))
   {
     ROS_WARN_STREAM_NAMED("perception",
@@ -465,7 +466,7 @@ double DockPerception::fit(const DockCandidatePtr& candidate, geometry_msgs::Pos
     // Initialize the number of times we retry if the fitness is bad.
     double retry = 5;
     // If the fitness is hosed or the angle is borked, try again.
-    quaternionMsgToTF(transform.rotation, cand_pose);
+    tf::quaternionMsgToTF(transform.rotation, cand_pose);
     while (retry-- &&
             (
               fitness                                                       > max_alignment_error_ ||
@@ -484,7 +485,7 @@ double DockPerception::fit(const DockCandidatePtr& candidate, geometry_msgs::Pos
       fitness = icp_2d::alignICP(ideal_cloud_, candidate->points, transform);
 
       // If the dock orientation seems flipped, flip it.
-      quaternionMsgToTF(transform.rotation, cand_pose);
+      tf::quaternionMsgToTF(transform.rotation, cand_pose);
       if (fabs(angles::normalize_angle(tf::getYaw(tf::inverse(cand_pose)*init_pose))) > 3.1415*(2.0/3.0) )
       {
         transform.rotation = tf::createQuaternionMsgFromYaw(3.1415 + tf::getYaw(transform.rotation));
@@ -492,7 +493,7 @@ double DockPerception::fit(const DockCandidatePtr& candidate, geometry_msgs::Pos
     }
 
     // If the dock orientation is still really borked, fail.
-    quaternionMsgToTF(transform.rotation, cand_pose);
+    tf::quaternionMsgToTF(transform.rotation, cand_pose);
     if (!isValid(cand_pose))
     {
       ROS_ERROR_STREAM_NAMED("perception",
